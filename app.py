@@ -30,28 +30,48 @@ app = Flask(__name__)
 
 def sacar_texto_img(img_url):
     prompt = """
-Eres un modelo de IA que analiza texto extraído de imágenes para detectar mensajes y posibles intentos de phishing.
-Tareas:
-1. Determinar si el contenido extraído de la imagen es un mensaje o no.
-2. Si es un mensaje, determinar si es un intento de phishing.
-3. Para phishing, devuelve también una estimación en porcentaje de la probabilidad de que sea phishing.
+    Eres un sistema de detección de phishing a partir de imágenes de mensajes. Tu tarea es:
+    1. Determinar si la imagen proporcionada contiene un mensaje legible (correo electrónico, SMS, notificación o chat). 
+    2. Si la imagen es un mensaje:
+        a. Determinar si es un intento de phishing o no.
+        b. Devolver un porcentaje que indique la probabilidad de que sea phishing. Si crees que NO es phishing, devuelve un porcentaje bajo, menor al 15%.
+    3. Si la imagen NO es un mensaje, no intentes calcular phishing, solo indica que no es un mensaje.
 
-Instrucciones:
-- Siempre devuelve un JSON válido.
-- Claves del JSON:
-  - "es_mensaje": true/false
-  - "es_phishing": true/false/null (null si no es mensaje)
-  - "probabilidad_phishing": porcentaje de 0 a 100, null si no aplica
-- No agregues explicaciones fuera del JSON.
-- Sé conciso y directo.
-- Analiza directamente la imagen proporcionada en la URL.
+    El resultado debe devolverse **exclusivamente en formato JSON**, con estas claves exactas:
 
-Ejemplo de JSON esperado:
-{
-  "es_mensaje": true, 
-  "es_phishing": true,
-  "probabilidad_phishing": 85
-}
+    - `es_mensaje` → booleano, True si es un mensaje, False si no.
+    - `es_phishing` → booleano, True si es phishing, False si no. Solo si `es_mensaje` es True.
+    - `probabilidad_phishing` → número entre 0 y 100, solo si `es_mensaje` es True. Nunca devuelvas null o None.
+
+    Ejemplos de formato de salida esperado:
+
+    1. Imagen NO es un mensaje:
+    {
+    "es_mensaje": false
+    "es_phishing": None,
+    "probabilidad_phishing": None
+    }
+
+    2. Imagen es un mensaje y NO es phishing:
+    {
+    "es_mensaje": true,
+    "es_phishing": false,
+    "probabilidad_phishing": 7
+    }
+
+    3. Imagen es un mensaje y SÍ es phishing:
+    {
+    "es_mensaje": true,
+    "es_phishing": true,
+    "probabilidad_phishing": 92
+    }
+
+    **Instrucciones adicionales**:
+    - Siempre devuelve JSON válido.
+    - Nunca uses null, None, ni claves vacías si "es_mensaje" = true.
+    - El porcentaje debe ser coherente con tu estimación: alto si es phishing, bajo si no.
+    - No agregues comentarios, explicaciones ni texto adicional fuera del JSON.
+
 """
 
     try:
@@ -155,6 +175,13 @@ def predictions():
     """
     return None
 
+# @app.route("/serve_image/<file_id>")
+# def serve_image(file_id):
+#     fs = GridFS(db)
+#     file = fs.get(ObjectId(file_id))
+#     return send_file(io.BytesIO(file.read()), mimetype=file.contentType)
+
+
 @app.route("/analizar_img", methods = ['GET', 'POST'])
 def analizar_img():
     """
@@ -162,24 +189,40 @@ def analizar_img():
     identifica si se trata de phishing o no y su porcentaje de phishing, por lo contrario envía un mensaje
     al usuario explicando que la imagen no es válida para la predicción
     """
+    resultado_url = None
+    resultado_img = None
+
+    # Verificar si envían URL
     img_url = request.form.get("img_url")
-    resultado = sacar_texto_img(img_url)
+    if img_url:
+        res = sacar_texto_img(img_url)
+        if res is None:
+            resultado_url = {"error": "Error al procesar la imagen, pruebe con otra."}
+        else:
+            resultado_url = res
 
-    if resultado is None:
-        resultado = "Error al procesar la imagen."
-    else:
-        resultado = json.dumps(resultado, indent=4)
+    # Verificar si envían archivo (desplegar en render para que cohere pueda leer la imagen bytes)
+    img_file = request.files.get("img_file")
+    if img_file:
+        # Guardar temporalmente para obtener URL accesible, o pasar bytes a Cohere
+        # Para simplificar asumimos que subes a un endpoint público o lo pasas como URL de prueba
+        # Aquí solo usamos una URL de ejemplo
+        res = sacar_texto_img("https://ejemplo.com/imagen_subida.png")
+        if res is None:
+            resultado_img = {"error": "Error al procesar la imagen subida."}
+        else:
+            resultado_img = res
 
-    return render_template("prueba_cohere.html", resultado=resultado)
-
+    return render_template(
+        "prediction_cohere.html",
+        resultado_url=resultado_url,
+        resultado_img=resultado_img
+    )
 @app.route("/minigame/image/<image_id>")
 def minigame_image(image_id):
     fs = GridFS(db)
     file = fs.get(ObjectId(image_id))
-    return send_file(
-        io.BytesIO(file.read()),
-        mimetype=file.contentType
-    )
+    return send_file(io.BytesIO(file.read()), mimetype=file.contentType)
 
 @app.route('/minigame', methods=['GET', 'POST'])
 def minigame():
