@@ -47,9 +47,9 @@ def sacar_texto_img(img_url):
 
     Ejemplo de JSON esperado:
     {
-    "es_mensaje": true,
-    "es_phishing": true,
-    "probabilidad_phishing": 85
+    "es_mensaje": <boolean>, 
+    "es_phishing": <boolean>,
+    "probabilidad_phishing": <float>
     }
 
     Texto extraído de la imagen: "{texto_extraido_de_la_imagen}"
