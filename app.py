@@ -27,74 +27,53 @@ co = cohere.ClientV2(api_key=cohere_api_key)
 
 app = Flask(__name__)
 
+
 def sacar_texto_img(img_url):
-    prompt = f"""
-    Eres un modelo de IA que analiza texto extraído de imágenes para detectar mensajes y posibles intentos de phishing.
-    Tareas:
-    1. Determinar si el contenido extraído de la imagen es un mensaje o no.
-    2. Si es un mensaje, determinar si es un intento de phishing.
-    3. Para phishing, devuelve también una estimación en porcentaje de la probabilidad de que sea phishing.
+    prompt = """
+Eres un modelo de IA que analiza texto extraído de imágenes para detectar mensajes y posibles intentos de phishing.
+Tareas:
+1. Determinar si el contenido extraído de la imagen es un mensaje o no.
+2. Si es un mensaje, determinar si es un intento de phishing.
+3. Para phishing, devuelve también una estimación en porcentaje de la probabilidad de que sea phishing.
 
-    Instrucciones:
-    - Siempre devuelve un JSON válido.
-    - Claves del JSON:
-    - "es_mensaje": true/false
-    - "es_phishing": true/false/null (null si no es mensaje)
-    - "probabilidad_phishing": porcentaje de 0 a 100, null si no aplica
-    - No agregues explicaciones fuera del JSON.
-    - Sé conciso y directo.
-    - Texto a analizar proviene de la imagen subida o de la URL de la imagen.
+Instrucciones:
+- Siempre devuelve un JSON válido.
+- Claves del JSON:
+  - "es_mensaje": true/false
+  - "es_phishing": true/false/null (null si no es mensaje)
+  - "probabilidad_phishing": porcentaje de 0 a 100, null si no aplica
+- No agregues explicaciones fuera del JSON.
+- Sé conciso y directo.
+- Analiza directamente la imagen proporcionada en la URL.
 
-    Ejemplo de JSON esperado:
-    {
-    "es_mensaje": <boolean>, 
-    "es_phishing": <boolean>,
-    "probabilidad_phishing": <float>
-    }
+Ejemplo de JSON esperado:
+{
+  "es_mensaje": true, 
+  "es_phishing": true,
+  "probabilidad_phishing": 85
+}
+"""
 
-    Texto extraído de la imagen: "{texto_extraido_de_la_imagen}"
-
-    """
-    try: 
+    try:
         response = co.chat(
             model="command-a-vision-07-2025",
             messages=[
                 {
                     "role": "user",
                     "content": [
-                        {
-                            "type": "text",
-                            "text": prompt
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                # Can be either a base64 data URI or a web URL.
-                                "url": img_url,
-                                "detail": "auto"
-                            }
-                        }
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": img_url, "detail": "auto"}}
                     ]
                 }
             ]
         )
+        # Cohere devuelve un objeto con response.message.content[0].text
         return json.loads(response.message.content[0].text)
-    
+
     except Exception as e:
-        # Si falla (URL inválida, error de Cohere, etc.), imprimimos el error en la consola
         print(f"Error procesando imagen en Cohere: {e}")
-        # Devolvemos None para que la app sepa que falló, pero NO se rompa (Error 500)
-        return None, None, None
-
-@app.route("/minigame/image/<image_id>")
-def minigame_image(image_id):
-    fs = GridFS(db)
-    file = fs.get(ObjectId(image_id))
-    return send_file(
-        io.BytesIO(file.read()),
-        mimetype=file.contentType
-    )
-
+        return None  # devuelve None si falla
+    
 def get_db():
     """
     Crear y comprobar la conexión a MongoDB y devolver la base de datos que se va a usar
@@ -176,6 +155,15 @@ def predictions():
     """
     return None
 
+@app.route("/minigame/image/<image_id>")
+def minigame_image(image_id):
+    fs = GridFS(db)
+    file = fs.get(ObjectId(image_id))
+    return send_file(
+        io.BytesIO(file.read()),
+        mimetype=file.contentType
+    )
+
 @app.route('/minigame', methods=['GET', 'POST'])
 def minigame():
     """
@@ -208,6 +196,17 @@ def minigame():
         image_id=image_id,
         result=result
     )
+@app.route("/analizar", methods = ['GET', 'POST'])
+def analizar():
+    img_url = request.form.get("img_url")
+    resultado = sacar_texto_img(img_url)
+
+    if resultado is None:
+        resultado = "Error al procesar la imagen."
+    else:
+        resultado = json.dumps(resultado, indent=4)
+
+    return render_template("prueba_cohere.html", resultado=resultado)
 
 if __name__ == "__main__":
     app.run(debug = True, host = "localhost", port  = 5000)

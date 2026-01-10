@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Anti-Phishing App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            width: 400px;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .resultado {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
+            max-width: 600px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprobar Imagen Anti-Phishing</h1>
+    <form method="POST" action="/analizar">
+        <label for="img_url">URL de la imagen:</label>
+        <input type="text" id="img_url" name="img_url" placeholder="https://ejemplo.com/imagen.png" required>
+        <input type="submit" value="Analizar">
+    </form>
+
+    {% if resultado %}
+    <div class="resultado">
+        <h2>Resultado del análisis:</h2>
+        <pre>{{ resultado }}</pre>
+    </div>
+    {% endif %}
+</body>
+</html>
