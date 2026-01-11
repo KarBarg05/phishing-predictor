@@ -223,24 +223,18 @@ def advising():
     """
     return render_template("advising.html")
 
-
-@app.route('/predictions', methods=['GET', 'POST'])
-def predictions():
-    """
-    Da las opciones de predecir por imagen (o URL de la imagen), texto o URL de página web dudosa
-    """
-    return None
-
+   
 # @app.route("/serve_image/<file_id>")
 # def serve_image(file_id):
 #     fs = GridFS(db)
 #     file = fs.get(ObjectId(file_id))
 #     return send_file(io.BytesIO(file.read()), mimetype=file.contentType)
 
-
-@app.route("/analizar_img", methods = ['GET', 'POST'])
-def analizar_img():
+@app.route('/predictions', methods=['GET', 'POST'])
+def predictions():
     """
+    Da las opciones de predecir por imagen (o URL de la imagen), texto o URL de página web dudosa
+
     A partir de una imagen o URL a la imagen, Cohere detecta si es un mensaje. En caso de que lo sea
     identifica si se trata de phishing o no y su porcentaje de phishing, por lo contrario envía un mensaje
     al usuario explicando que la imagen no es válida para la predicción
@@ -270,7 +264,7 @@ def analizar_img():
             resultado_img = res
 
     return render_template(
-        "prediction_cohere.html",
+        "predictions.html",
         resultado_url=resultado_url,
         resultado_img=resultado_img
     )
