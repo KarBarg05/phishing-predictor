@@ -28,7 +28,12 @@ co = cohere.ClientV2(api_key=cohere_api_key)
 app = Flask(__name__)
 
 
-def sacar_texto_img(img_url):
+def sacar_texto_img(img_url): #características devueltas del modelo predictivo
+    """
+    Cohere analiza la imagen ofrecida del usuario y devuelve un JSON con la predicción,
+    si la imagen introducida del usuario es válida o no y un porcentaje de riesgo de phishing
+    """
+
     prompt = """
     Eres un sistema de detección de phishing a partir de imágenes de mensajes. Tu tarea es:
     1. Determinar si la imagen proporcionada contiene un mensaje legible (correo electrónico, SMS, notificación o chat). 
@@ -71,9 +76,9 @@ def sacar_texto_img(img_url):
     - Nunca uses null, None, ni claves vacías si "es_mensaje" = true.
     - El porcentaje debe ser coherente con tu estimación: alto si es phishing, bajo si no.
     - No agregues comentarios, explicaciones ni texto adicional fuera del JSON.
+    - Devuele un mensaje explicando el cómo has llegado a ala conclusión de que la imagen introducida era phishing o no. 
 
 """
-
     try:
         response = co.chat(
             model="command-a-vision-07-2025",
@@ -93,6 +98,57 @@ def sacar_texto_img(img_url):
     except Exception as e:
         print(f"Error procesando imagen en Cohere: {e}")
         return None  # devuelve None si falla
+    
+def get_explanation(text, prediction): #texto del usuario y prediccion del modelo 
+    """
+    Aquí la IA de Cohere tiene que averiguar y explicar el porqué el modelo ha dado los resultados que ha dado.
+    """
+
+    label = "phishing" if prediction == 1 else "no phishing"
+
+    prompt = f"""
+    Eres un experto en ciberseguridad.
+    Un modelo automático ha analizado el siguiente texto y ha concluido que ES {label.upper()}.
+    Texto analizado:
+    \"\"\"{text}\"\"\"
+
+    Explica de forma clara y sencilla por qué este texto puede considerarse {label}.
+    Menciona señales típicas de phishing si existen, como urgencia, suplantación de identidad,
+    enlaces sospechosos o solicitudes de información sensible.
+    No inventes datos.
+    """
+    try:
+        response = co.generate(
+            model="command",
+            prompt=prompt,
+            max_tokens=200,
+            temperature=0.3
+        )
+
+        story = response.message.content[0].text
+        if story:
+            return story.strip()
+
+        # Si cohere falla y no devuelve una historia
+        raise RuntimeError("Cohere returned empty story")
+
+    except Exception as e:
+        #Envía historia en caso de fallo 
+        print(f"Warning: Cohere failed to generate story from text: {e}")
+        if label == "phishing":
+            fallbacks = [
+                "Este texto presenta varias características comunes en mensajes de phishing."
+                "Se ha detectado un tono de urgencia y una posible solicitud de acción inmediata, lo cual es una técnica habitual utilizada para engañar al usuario. Además, el contenido puede estar relacionado con la suplantación de identidad de una entidad legítima."
+                "Por seguridad, se recomienda no hacer clic en enlaces, no responder al mensaje y verificar la información directamente con la entidad oficial."
+            ]
+            return random.choice(fallbacks)
+        else:
+            fallbacks = [
+                "El texto analizado no muestra señales claras asociadas a phishing.",
+                "No se han detectado solicitudes de información sensible ni lenguaje alarmista. El contenido parece informativo y coherente, sin patrones típicos de engaño.",
+                "Aun así, se recomienda mantener precaución y verificar siempre el origen del mensaje."
+            ]
+            return random.choice(fallbacks)
     
 def get_db():
     """
