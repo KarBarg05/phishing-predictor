@@ -3,399 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PhishingPredictor | Centro de Ayuda</title>
+<title>PhishingPredictor | Centro de Ayuda Mejorado</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'Roboto', sans-serif; background:#f9f9f9; color:#333; overflow-x:hidden; line-height:1.6; }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    overflow-x: hidden;
-}
+/* BACKGROUND PARTICLES */
+canvas#bgCanvas { position:fixed; inset:0; z-index:0; }
 
-/* ===== BACKGROUND PARTICULAS ===== */
-canvas#bgCanvas {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-}
+/* HEADER */
+header { position:fixed; top:0; left:0; right:0; z-index:999; padding:1.5rem 4rem; background: rgba(255,255,255,0.95); box-shadow:0 4px 14px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; }
+header h1 { font-size:2.6rem; color:#1e3c72; font-weight:700; }
+.home-btn { text-decoration:none; background: linear-gradient(135deg,#1e90ff,#00bfff); color:#fff; padding:0.75rem 2rem; border-radius:50px; font-weight:500; display:flex; align-items:center; gap:0.6rem; transition:all 0.3s ease; }
+.home-btn:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(30,144,255,0.35); }
 
-/* ===== HEADER ===== */
-header {
-    position: relative;
-    z-index: 2;
-    padding: 2rem 4rem;
-    background: rgba(255,255,255,0.95);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+/* INTRO */
+.intro { position:relative; z-index:2; max-width:900px; margin:8rem auto 2rem; padding:0 2rem; text-align:center; }
+.intro h2 { font-size:3rem; color:#1e90ff; margin-bottom:1rem; }
+.nav-sections { display:flex; justify-content:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+.nav-sections a { padding:0.7rem 1.6rem; background: rgba(255,255,255,0.95); border-radius:50px; box-shadow:0 6px 18px rgba(0,0,0,0.1); text-decoration:none; color:#1e3c72; font-weight:500; transition:all 0.3s ease; }
+.nav-sections a:hover { background:#1e90ff; color:#fff; transform:translateY(-3px); }
 
-header h1 {
-    font-size: 2.4rem;
-    font-weight: 700;
-    color: #1e3c72;
-}
+/* SECTIONS */
+.section { max-width:1100px; margin:3rem auto 6rem; padding:0 2rem; }
+.section h3 { font-size:2.2rem; color:#1e3c72; margin-bottom:1.5rem; scroll-margin-top:100px; }
 
-/* ===== HOME BUTTON ===== */
-.home-btn {
-    text-decoration: none;
-    background: linear-gradient(135deg, #1e90ff, #00bfff);
-    color: #fff;
-    padding: 0.75rem 1.9rem;
-    border-radius: 50px;
-    font-weight: 500;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    transition: all 0.3s ease;
-}
+/* ACCORDION */
+.accordion { background:#fff; color:#333; cursor:pointer; padding:1rem 1.5rem; width:100%; border:none; text-align:left; font-size:1rem; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; transition:0.3s; margin-bottom:0.5rem; }
+.accordion:hover { background:#f1f1f1; }
+.accordion .title { flex:1; }
+.accordion i { margin-left:1rem; transition:0.3s; }
+.accordion.active i { transform:rotate(180deg); }
+.panel { background:white; max-height:0; overflow:hidden; transition:max-height 0.35s ease; padding:0 1.5rem; border-radius:0 0 10px 10px; margin-bottom:1rem; box-shadow:0 8px 20px rgba(0,0,0,0.08); }
+.panel p, .panel ul { font-size:0.95rem; margin:0.5rem 0; color:#555; }
+.panel ul { margin-left:1.5rem; list-style: disc; }
+.panel a { display:inline-block; margin-top:0.5rem; color:#1e90ff; text-decoration:none; }
+.panel a:hover { text-decoration:underline; }
 
-.home-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(30,144,255,0.35);
-}
+/* VIDEOS */
+.video-scroll { display:flex; gap:1rem; overflow-x:auto; padding-bottom:1.5rem; }
+.video-scroll::-webkit-scrollbar { display:none; }
+.video-scroll { scrollbar-width:none; }
+.video-item { flex:0 0 280px; }
+.video-item iframe { width:100%; height:160px; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.15); }
 
-/* ===== INTRO ===== */
-.intro {
-    position: relative;
-    z-index: 2;
-    max-width: 1100px;
-    margin: 4rem auto;
-    padding: 0 3rem;
-    text-align: center;
-}
+/* BLOGS */
+.blogs-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap:1.5rem; }
+.blog-card { background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.1); transition:transform 0.3s ease; }
+.blog-card:hover { transform:translateY(-3px); box-shadow:0 15px 30px rgba(0,0,0,0.12); }
+.blog-card h4 { font-size:1.2rem; color:#1e90ff; margin-bottom:0.4rem; }
+.blog-card p { font-size:0.9rem; color:#555; margin-bottom:0.5rem; }
+.blog-card a { color:#1e90ff; text-decoration:none; }
+.blog-card a:hover { text-decoration:underline; }
 
-.intro h2 {
-    font-size: 2.6rem;
-    color: #1e90ff;
-    margin-bottom: 1rem;
-}
+/* FOOTER */
+footer { position:relative; z-index:2; text-align:center; padding:2rem; background:rgba(255,255,255,0.9); font-size:0.95rem; color:#555; }
 
-.intro p {
-    font-size: 1.1rem;
-    color: #555;
-    max-width: 780px;
-    margin: auto;
-}
-
-/* ===== NAV ===== */
-.nav-sections {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 5rem;
-    position: relative;
-    z-index: 2;
-}
-
-.nav-sections a {
-    padding: 0.8rem 1.8rem;
-    background: rgba(255,255,255,0.95);
-    border-radius: 50px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    text-decoration: none;
-    color: #1e3c72;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.nav-sections a:hover {
-    background: #1e90ff;
-    color: #fff;
-    transform: translateY(-3px);
-}
-
-/* ===== SECTIONS ===== */
-.section {
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    margin: 0 auto 5rem;
-    padding: 0 3rem;
-}
-
-.section h3 {
-    font-size: 2rem;
-    color: #1e3c72;
-    margin-bottom: 2rem;
-}
-
-/* ===== FAQ ===== */
-.faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-}
-
-.faq-card {
-    background: rgba(255,255,255,0.96);
-    padding: 2.2rem;
-    border-radius: 22px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.faq-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 35px rgba(0,0,0,0.15);
-}
-
-.faq-card h4 {
-    color: #1e90ff;
-    margin-bottom: 0.6rem;
-}
-
-.faq-card p {
-    color: #555;
-    font-size: 1rem;
-}
-
-.faq-card a {
-    display: inline-block;
-    margin-top: 0.8rem;
-    font-size: 0.95rem;
-    color: #1e90ff;
-    text-decoration: none;
-}
-
-.faq-card a:hover {
-    text-decoration: underline;
-}
-
-/* ===== VIDEOS ===== */
-.video-scroll {
-    display: flex;
-    gap: 2rem;
-    overflow-x: auto;
-    padding-bottom: 1.5rem;
-}
-
-.video-scroll::-webkit-scrollbar { display: none; }
-.video-scroll { scrollbar-width: none; }
-
-.video-item {
-    flex: 0 0 360px;
-}
-
-@media (min-width: 1200px) {
-    .video-item { flex: 1; }
-}
-
-.video-item iframe {
-    width: 100%;
-    height: 220px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-}
-
-/* ===== TIPS ===== */
-.tips-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 2rem;
-}
-
-.tip {
-    background: rgba(255,255,255,0.96);
-    padding: 2.4rem;
-    border-radius: 26px;
-    box-shadow: 0 14px 35px rgba(0,0,0,0.12);
-    display: flex;
-    gap: 1.4rem;
-    align-items: flex-start;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.tip:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.tip-icon {
-    min-width: 56px;
-    height: 56px;
-    background: rgba(30,144,255,0.15);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tip-icon i {
-    font-size: 1.6rem;
-    color: #1e90ff;
-}
-
-.tip-text h4 {
-    margin-bottom: 0.4rem;
-    color: #1e3c72;
-}
-
-.tip-text p {
-    font-size: 0.95rem;
-    color: #555;
-}
-
-/* ===== FOOTER ===== */
-footer {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: 2rem;
-    background: rgba(255,255,255,0.9);
-    font-size: 0.95rem;
-    color: #555;
+/* RESPONSIVE */
+@media(max-width:768px){
+    .intro h2{font-size:2rem;}
+    .section h3{font-size:1.8rem;}
+    .accordion{font-size:0.95rem;}
+    .video-item iframe{height:140px;}
 }
 </style>
 </head>
-
 <body>
 
 <canvas id="bgCanvas"></canvas>
 
 <header>
     <h1>PhishingPredictor</h1>
-    <a href="/" class="home-btn">
-        <i class="fas fa-home"></i> Volver al Inicio
-    </a>
+    <a href="/" class="home-btn"><i class="fas fa-home"></i> Volver al Inicio</a>
 </header>
 
 <section class="intro">
     <h2>Centro de ayuda anti-phishing</h2>
-    <p>Conoce cómo funcionan los ataques de phishing, aprende a identificarlos y protege tu información digital con buenas prácticas.</p>
+    <div class="nav-sections">
+        <a href="#faq">FAQ</a>
+        <a href="#viruses">Virus</a>
+        <a href="#bigdata">Big Data</a>
+        <a href="#videos">Vídeos</a>
+        <a href="#blogs">Blogs</a>
+    </div>
 </section>
-
-<nav class="nav-sections">
-    <a href="#faq">FAQ</a>
-    <a href="#learn">Aprende</a>
-    <a href="#tips">Consejos</a>
-</nav>
 
 <section id="faq" class="section">
     <h3>Preguntas frecuentes</h3>
-    <div class="faq-grid">
+    <div class="accordion" data-link="https://www.incibe.es/ciudadania/que-es-phishing">
+        <span class="title">¿Qué es el phishing?</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel">
+        <p>El phishing intenta robar información suplantando entidades legítimas.</p>
+        <ul>
+            <li>Emails, SMS, llamadas o redes sociales</li>
+            <li>Enlaces falsos o archivos maliciosos</li>
+            <li>Urgencia o amenazas</li>
+        </ul>
+        <a href="https://www.incibe.es/ciudadania/que-es-phishing" target="_blank">Leer más →</a>
+    </div>
 
-        <div class="faq-card">
-            <h4>¿Qué es exactamente el phishing?</h4>
-            <p>Es un ataque que suplanta a entidades legítimas para obtener credenciales, datos bancarios o información personal.</p>
-            <a href="https://www.incibe.es/ciudadania/que-es-phishing" target="_blank">Leer más en INCIBE →</a>
-        </div>
-
-        <div class="faq-card">
-            <h4>¿Cómo puedo detectar un correo fraudulento?</h4>
-            <p>Analiza el remitente, errores gramaticales, enlaces sospechosos y mensajes de urgencia.</p>
-            <a href="https://www.kaspersky.es/resource-center/definitions/phishing" target="_blank">Guía detallada →</a>
-        </div>
-
-        <div class="faq-card">
-            <h4>¿Qué debo hacer si he caído en phishing?</h4>
-            <p>Cambia contraseñas, revisa accesos, activa 2FA y reporta el incidente.</p>
-            <a href="https://www.osi.es/es/actualidad/blog/2022/07/21/has-sido-victima-de-phishing" target="_blank">Pasos recomendados →</a>
-        </div>
-
-        <div class="faq-card">
-            <h4>¿El phishing solo ocurre por email?</h4>
-            <p>No. También existe phishing por SMS, llamadas telefónicas y redes sociales.</p>
-            <a href="https://www.cloudflare.com/es-es/learning/security/threats/phishing/" target="_blank">Tipos de phishing →</a>
-        </div>
-
-        <div class="faq-card">
-            <h4>¿Puede afectar el phishing a empresas?</h4>
-            <p>Sí, es una de las principales causas de brechas de seguridad corporativas.</p>
-            <a href="https://www.ibm.com/topics/phishing" target="_blank">Impacto en empresas →</a>
-        </div>
-
-        <div class="faq-card">
-            <h4>¿Es lo mismo phishing que malware?</h4>
-            <p>No. El phishing engaña al usuario; el malware infecta el sistema.</p>
-            <a href="https://www.avast.com/es-es/c-phishing-vs-malware" target="_blank">Diferencias →</a>
-        </div>
-
+    <div class="accordion" data-link="https://www.kaspersky.es/resource-center/definitions/phishing">
+        <span class="title">Señales de correo fraudulento</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel">
+        <ul>
+            <li>Remitente sospechoso</li>
+            <li>Enlaces extraños</li>
+            <li>Errores ortográficos</li>
+            <li>Solicitudes urgentes de información</li>
+        </ul>
+        <a href="https://www.kaspersky.es/resource-center/definitions/phishing" target="_blank">Guía detallada →</a>
     </div>
 </section>
 
-<section id="learn" class="section">
-    <h3>Aprende con vídeos</h3>
+<section id="viruses" class="section">
+    <h3>Tipos de virus asociados al phishing</h3>
+    <div class="accordion" data-link="https://www.kaspersky.es/resource-center/threats/banking-malware">
+        <span class="title">Malware bancario</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel">
+        <p>Programas que roban credenciales bancarias.</p>
+        <ul>
+            <li>Spyware</li>
+            <li>Keyloggers</li>
+            <li>Troyanos</li>
+        </ul>
+        <a href="https://www.kaspersky.es/resource-center/threats/banking-malware" target="_blank">Más info →</a>
+    </div>
+
+    <div class="accordion" data-link="https://www.incibe.es/protege-tu-empresa/ransomware">
+        <span class="title">Ransomware</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel">
+        <p>Cifra archivos y pide rescate. Se propaga vía phishing.</p>
+        <ul>
+            <li>Protege backups</li>
+            <li>No abras archivos sospechosos</li>
+            <li>Software actualizado</li>
+        </ul>
+        <a href="https://www.incibe.es/protege-tu-empresa/ransomware" target="_blank">Más info →</a>
+    </div>
+</section>
+
+<section id="bigdata" class="section">
+    <h3>Big Data contra el phishing</h3>
+    <div class="accordion">
+        <span class="title">Detección masiva</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel"><p>Analizamos millones de URLs y correos para identificar patrones de phishing y malware.</p></div>
+    <div class="accordion">
+        <span class="title">Predicción y prevención</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="panel"><p>Modelos de IA predicen posibles ataques y alertan antes de que afecten a los usuarios.</p></div>
+</section>
+
+<section id="videos" class="section">
+    <h3>Vídeos educativos</h3>
     <div class="video-scroll">
-        <div class="video-item">
-            <iframe src="https://www.youtube.com/embed/Z34PbwQtGqk"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowfullscreen></iframe>
-        </div>
-        <div class="video-item">
-            <iframe src="https://www.youtube.com/embed/mE7w2k_MkiU"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowfullscreen></iframe>
-        </div>
-        <div class="video-item">
-            <iframe src="https://www.youtube.com/embed/JlQovysQBn0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowfullscreen></iframe>
-        </div>
+        <div class="video-item"><iframe src="https://www.youtube.com/embed/Z34PbwQtGqk" allowfullscreen></iframe></div>
+        <div class="video-item"><iframe src="https://www.youtube.com/embed/mE7w2k_MkiU" allowfullscreen></iframe></div>
+        <div class="video-item"><iframe src="https://www.youtube.com/embed/JlQovysQBn0" allowfullscreen></iframe></div>
     </div>
 </section>
 
-<section id="tips" class="section">
-    <h3>Consejos clave</h3>
-    <div class="tips-grid">
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-shield-halved"></i></div>
-            <div class="tip-text">
-                <h4>Desconfía por defecto</h4>
-                <p>Asume que cualquier mensaje puede ser malicioso hasta verificarlo.</p>
-            </div>
+<section id="blogs" class="section">
+    <h3>Blogs y recursos recomendados</h3>
+    <div class="blogs-grid">
+        <div class="blog-card">
+            <h4>Kaspersky Security Blog</h4>
+            <p>Noticias y análisis sobre virus, phishing y ciberseguridad.</p>
+            <a href="https://www.kaspersky.es/blog" target="_blank">Leer blog →</a>
         </div>
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-link-slash"></i></div>
-            <div class="tip-text">
-                <h4>No pulses enlaces</h4>
-                <p>Accede manualmente a las webs escribiendo la URL.</p>
-            </div>
+        <div class="blog-card">
+            <h4>Avast Blog</h4>
+            <p>Consejos sobre protección antivirus y prevención de malware.</p>
+            <a href="https://www.avast.com/es-es/blog" target="_blank">Leer blog →</a>
         </div>
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-envelope-open-text"></i></div>
-            <div class="tip-text">
-                <h4>Verifica el remitente</h4>
-                <p>Comprueba dominios y direcciones completas.</p>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-user-shield"></i></div>
-            <div class="tip-text">
-                <h4>No compartas credenciales</h4>
-                <p>Ninguna empresa legítima te las pedirá.</p>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-lock"></i></div>
-            <div class="tip-text">
-                <h4>Activa doble factor</h4>
-                <p>Reduce drásticamente el impacto de un ataque.</p>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-icon"><i class="fas fa-triangle-exclamation"></i></div>
-            <div class="tip-text">
-                <h4>No actúes con prisas</h4>
-                <p>La urgencia es una de las técnicas más usadas en phishing.</p>
-            </div>
-        </div>
-
     </div>
 </section>
 
@@ -404,38 +199,36 @@ footer {
 </footer>
 
 <script>
+// PARTICLES
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
-
-const particles = Array.from({ length: 70 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 4 + 3,
-    vx: (Math.random() - 0.5) * 0.6,
-    vy: (Math.random() - 0.5) * 0.6
-}));
-
-function animate() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(30,144,255,0.22)";
-        ctx.fill();
-    });
-    requestAnimationFrame(animate);
-}
+const particles = Array.from({length:70},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*4+3,vx:(Math.random()-0.5)*0.6,vy:(Math.random()-0.5)*0.6}));
+function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>canvas.width)p.vx*=-1;if(p.y<0||p.y>canvas.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle="rgba(30,144,255,0.22)";ctx.fill();});requestAnimationFrame(animate);}
 animate();
+
+// ACCORDION FUNCIONAL + LINK DIRECTO
+const accordions = document.querySelectorAll(".accordion");
+accordions.forEach(acc=>{
+    const title = acc.querySelector(".title");
+    const link = acc.dataset.link;
+    acc.addEventListener("click",(e)=>{
+        // si se clickea el texto del title y hay link
+        if(e.target===title && link) { window.open(link,"_blank"); return; }
+        acc.classList.toggle("active");
+        const panel = acc.nextElementSibling;
+        if(panel.style.maxHeight){ panel.style.maxHeight=null; }
+        else{ panel.style.maxHeight = panel.scrollHeight + "px"; }
+    });
+});
 </script>
 
 </body>
 </html>
+
+
+
 
 
 

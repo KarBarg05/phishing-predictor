@@ -217,23 +217,35 @@ def report():
     Formulario que tiene que rellenar el usuario para poder reportar el intento de phishing.
     Cada vez que el usuario envía algo tiene que subirse a la db
     """
-    link_encontrado = None
     collection_links = db["report_reliable_links"]
     collection_antivirus = db["best antivirus"]
+
     report_links = collection_links.find_one({}, {"_id": 0})
     antivirus_list = list(collection_antivirus.find({}, {"_id": 0}))
 
+    resultados = None
+    tipo_seleccionado = None
+    pais_seleccionado = None
+
     if request.method == "POST":
-        tipo = request.form.get("tipo")
-        pais = request.form.get("pais", "Global")
-        link_encontrado = report_links.get(tipo, {}).get(pais, report_links.get(tipo, {}).get("Global"))
+        tipo_seleccionado = request.form.get("tipo")
+        pais_seleccionado = request.form.get("pais", "Global")
+
+        if tipo_seleccionado:
+            resultados = report_links.get(tipo_seleccionado, {}).get(
+                pais_seleccionado,
+                report_links.get(tipo_seleccionado, {}).get("Global", [])
+            )
 
     return render_template(
         "report.html",
-        report_links=report_links,
-        link_encontrado=link_encontrado,
-        antivirus_list=antivirus_list
+        resultados=resultados,
+        antivirus_list=antivirus_list,
+        tipo_seleccionado=tipo_seleccionado,
+        pais_seleccionado=pais_seleccionado
     )
+
+
 
 @app.route('/advising', methods=['GET', 'POST'])
 def advising():
