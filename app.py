@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -247,14 +247,32 @@ def report():
 
 
 
-@app.route('/advising', methods=['GET', 'POST'])
-def advising():
+@app.route("/api/mapa-phishing")
+def mapa_phishing():
     """
-    Contiene las FAQ en relación al phishing, también contiene links (o vídeos insertados) explicando dudas y
-    definiciones simples para ayudar a la persona a detectar posibles scams
+    Devuelve los datos de phishing para el mapa interactivo
     """
-    return render_template("advising.html")
+    collection = db["mapa_phishing"]
 
+    datos = list(collection.find({}, {
+        "_id": 0,          #quitamos el ObjectId
+        "pais": 1,
+        "lat": 1,
+        "lon": 1,
+        "tipo": 1,
+        "titulo": 1,
+        "historia": 1,
+        "anio": 1
+    }))
+
+    return jsonify(datos)
+
+@app.route("/mapa")
+def mapa():
+    """
+    Página del mapa interactivo de phishing
+    """
+    return render_template("mapa_phishing.html")
    
 # @app.route("/serve_image/<file_id>")
 # def serve_image(file_id):
