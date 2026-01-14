@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Predicciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .phishing {
+            color: red;
+            font-weight: bold;
+        }
+        .safe {
+            color: green;
+            font-weight: bold;
+        }
+        .small {
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Historial de predicciones</h1>
+
+    {% if datos and datos|length > 0 %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Input</th>
+                <th>Resultado</th>
+                <th>Probabilidad (%)</th>
+                <th>Explicación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in datos %}
+            <tr>
+                <td>
+                    {{ d.fecha.strftime("%Y-%m-%d %H:%M:%S") if d.fecha else "—" }}
+                </td>
+                <td>{{ d.tipo }}</td>
+                <td class="small">
+                    {{ d.input }}
+                </td>
+                <td>
+                    {% if d.es_phishing %}
+                        <span class="phishing">PHISHING</span>
+                    {% else %}
+                        <span class="safe">SEGURO</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ d.probabilidad if d.probabilidad is not none else "—" }}
+                </td>
+                <td class="small">
+                    {{ d.explicacion }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+        <p>No hay predicciones guardadas todavía.</p>
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        <a href="{{ url_for('home') }}">← Volver al inicio</a>
+    </p>
+
+</body>
+</html>

@@ -15,7 +15,8 @@ import requests
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
+
 
 
 
@@ -320,6 +321,21 @@ def analisis_url_hibrido(url_usuario):
             "detalles": {"nota": "Análisis parcial debido a complejidad de la URL"}
         }
 
+def guardar_prediccion(tipo, input_usuario, resultado):
+    collection = db["predictions_history"]
+
+    documento = {
+        "tipo": tipo,
+        "input": input_usuario,
+        "es_phishing": bool(resultado.get("es_phishing")),
+        "probabilidad": float(resultado.get("probabilidad")) if resultado.get("probabilidad") is not None else None,
+        "explicacion": resultado.get("explicacion"),
+        "fecha": datetime.now(timezone.utc)
+    }
+
+    collection.insert_one(documento)
+
+
 def get_db():
     """
     Crear y comprobar la conexión a MongoDB y devolver la base de datos que se va a usar
@@ -369,7 +385,9 @@ def history():
     """
     Página que enseña los datos historicos (todos lo que tenemos en la bd)
     """
-    return None
+    collection = db["predictions_history"]
+    datos = list(collection.find().sort("fecha", -1))
+    return render_template("history.html", datos=datos)
 
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
@@ -465,6 +483,18 @@ def predictions():
         img_url = request.form.get("img_url")
         if img_url:
             res = analisis_img(img_url)
+            if res:
+                resultado_img = res
+
+                guardar_prediccion(
+                    tipo="imagen",
+                    input_usuario=img_url,
+                    resultado={
+                        "es_phishing": res.get("es_phishing"),
+                        "probabilidad": res.get("probabilidad_phishing"),
+                        "explicacion": res.get("explicacion")
+                    }
+                )
             if res is None:
                 resultado_img = {"error": "Error al procesar la imagen, pruebe con otra."}
             else:
@@ -487,11 +517,24 @@ def predictions():
         url_input = request.form.get("url_input")
         if url_input:
             resultado_url = analisis_url_hibrido(url_input)
+            if resultado_url and "error" not in resultado_url:
+                guardar_prediccion(
+                    tipo="url",
+                    input_usuario=url_input,
+                    resultado=resultado_url
+                )
+
 
         # Caso 3: El texto de un mensaje
         text_input = request.form.get("text_input")
         if text_input:
             resultado_texto = analisis_texto_onnx(text_input)
+            if resultado_texto and "error" not in resultado_texto:
+                guardar_prediccion(
+                    tipo="texto",
+                    input_usuario=text_input,
+                    resultado=resultado_texto
+                )
 
 
     return render_template(
@@ -539,6 +582,9 @@ def minigame():
         result=result
     )
 
+@app.route('/presentacion', methods=['GET', 'POST'])
+def presentacion():
+    return render_template("presentacion.html")
 
 if __name__ == "__main__":
     app.run(debug = True, host = "localhost", port  = 5000)
